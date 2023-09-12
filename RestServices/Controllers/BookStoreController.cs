@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using RestServices.Models.Db;
 namespace RestServices.Controllers
 {
@@ -22,7 +22,7 @@ namespace RestServices.Controllers
             return Ok(BookService.GetAllBooks());            
         }
         [HttpGet]
-        [Route("Book_id")]
+        [Route("Book_id/{id}")]
         public IActionResult GetBook(int id)
         {
             BookDetail book=BookService.GetBookById(id);
@@ -30,23 +30,19 @@ namespace RestServices.Controllers
             return NotFound(0);
         }
         [HttpGet]
-        [Route("Book_name")]
-        public IActionResult GetBookName(string name)
+        [Route("Book_name/{name}")]
+        public ObjectResult GetBookName(string name)
         {
-            BookDetail book = BookService.GetBookByName(name);
-            if (book != null) return Ok(book);
-            return NotFound(0);
+            return Ok(BookService.GetBookByName(name));
         }
         [HttpGet]
-        [Route("Book_author")]
-        public IActionResult GetBookAuthor(string name)
+        [Route("Book_author/{name}")]
+        public ObjectResult GetBookAuthor(string name)
         {
-            BookDetail book = BookService.GetBookByAuthor(name);
-            if (book != null) return Ok(book);
-            return NotFound(0);
+            return Ok(BookService.GetBookByAuthor(name));
         }
         [HttpGet]
-        [Route("Book_category")]
+        [Route("Book_category/{name}")]
         public ObjectResult GetBookCategory(string name)
         {
             return Ok(BookService.GetBookByCategory(name));           
@@ -60,7 +56,7 @@ namespace RestServices.Controllers
             return BadRequest();    
         }
         [HttpDelete]
-        [Route("Del_book")]
+        [Route("Del_book/{id}")]
         public IActionResult DeleteBook(int id)
         {
             bool res= BookService.DeleteBooks(id);
@@ -78,11 +74,12 @@ namespace RestServices.Controllers
 
         //--------------------------------------- User Services ----------------------------------------
         [HttpGet]
-        [Route("U_id")]
-        public IActionResult GetUser(int id)
+        [Route("U_id/{name}")]
+        public IActionResult GetUser(string name)
         {
-            AppUser user = UserService.GetUserById(id);
-            if (user != null) return Ok(user);
+            int user = UserService.GetUserByName(name);
+            if (user != null)
+                return Ok(user);
             return NotFound(0);
         }
 
@@ -95,11 +92,11 @@ namespace RestServices.Controllers
             if (user != null) return Ok(user);
             return NotFound(0);
         }
-        [HttpPut]
-        [Route("Updt_User")]
+        [HttpPost]
+        [Route("Updt_User/{userName}/{addr}")]
         public IActionResult UpdateUser(int id, string addr)
         {
-            bool res = UserService.UpdateAddress(id,addr);
+            bool res = UserService.UpdateAddress(id ,addr);
             if (res) return Ok();
             return NotFound();
         }
@@ -112,29 +109,38 @@ namespace RestServices.Controllers
             return NotFound();
         }
         [HttpPost]
-        [Route("Order")]
-        public IActionResult PostOrder(int bid, int quantity, int cid)    //ask
+        [Route("Order/{cid}")]
+        public IActionResult PostOrder(PlaceOrderModel[] x, int cid)    
         {
-            int res= OrderService.generateOrder(bid, quantity, cid);
+            var res = 0;
+            //foreach(var i in x)
+                res= OrderService.generateOrder(x, cid);
             if(res==1)
-            return Ok();
+                return Ok();
             return BadRequest();
         }
         
         [HttpPost]
-        [Route("SignUp")]
-        public IActionResult SignUp(string address, string name, string email, string password, string contact)    //ask
+        [Route("SignUp/{name}/{email}/{password}/{contact}")]
+        public IActionResult SignUp(string name, string email, string password, string contact)    //ask
         {
-            int res = UserService.AddUser(address, name, email, password, contact);
+            int res = UserService.AddUser(name, email, password, contact);
             if (res == 1) return Ok();
             return BadRequest();
         }
 
         [HttpGet]
-        [Route("Order_de")]
+        [Route("Order_id/{Cust_id}")]
         public ObjectResult GetOrder(int Cust_id)
         {
-            return Ok(OrderService.getOrderDetails(Cust_id));
+            return Ok(OrderService.getOrderIds(Cust_id));
+        }
+
+        [HttpGet]
+        [Route("Order_de/{OrderId}")]
+        public ObjectResult GetOrderDetails(int OrderId)
+        {
+            return Ok(OrderService.getOrderDetails(OrderId));
         }
 
     }
